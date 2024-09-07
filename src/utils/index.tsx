@@ -4,6 +4,7 @@ import { parse, HTMLElement } from 'node-html-parser' // 这个最终没有被ug
 import {platform} from './platform'
 import {log} from './logger'
 
+
 /**
  * 包含错误兜底和提示的Taro.request函数
  */
@@ -22,7 +23,7 @@ function request (param: Taro.request.Param, isShowError?) {
   return Taro.request(param).then(res => {
     if (res.statusCode !== 200) {
       throw new Error(`请求发生错误（statusCode为${res.statusCode}）`)
-    }
+    } 
     return res
   }).catch(e => fail(e))
 }
@@ -31,12 +32,15 @@ function request (param: Taro.request.Param, isShowError?) {
  * 爬虫并返回解析后的dom
  * @param url 
  */
-export function crawlToDom (url: string, isShowError = true) {
+export function crawlToDom (url: string, auth: string, isShowError = true) {
   return request({
     url,
     header: {
-      'content-type': 'text/html'
-    }
+      'content-type': 'text/html',
+      'Cookie': auth,
+    },
+    // xhrFields:{withCredentials: true},
+    credentials: 'include',
   }, isShowError).then((res: any) => {
     return parse(res.data) as HTMLElement
   })
@@ -48,7 +52,7 @@ export function crawlToDom (url: string, isShowError = true) {
  * @param callback 每爬取一次都会回调一次接口
  * @param delay 默认间隔1000ms爬取一次
  */
-export function crawlToDomOnBatch (urlArr: string[] = [], callback: Function = () => {}, delay: number = 1000) {
+export function crawlToDomOnBatch (urlArr: string[] = [], auth: string, callback: Function = () => {}, delay: number = 1000) {
   let i = 0
   let count = 0 // 因为网络延迟，接口不一定会按顺序完成请求，甚至有时候是并行的，所以不能够返回i给callback，而是依赖count来计算进度
   let timer
@@ -59,7 +63,7 @@ export function crawlToDomOnBatch (urlArr: string[] = [], callback: Function = (
       return
     }
 
-    crawlToDom(urlArr[i++])
+    crawlToDom(urlArr[i++], auth)
       .then(root => callback(root, count++, () => clearInterval(timer)))
       .catch((e) => {
         clearInterval(timer)

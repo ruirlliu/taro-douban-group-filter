@@ -106,6 +106,12 @@ class Index extends Component {
     })
   }
 
+  onNavigatorClick = () => {
+    const cId = this.$router.params.cId
+    const jumpUrl = `https://www.douban.com/doubanapp/dispatch?from=mdouban&copy_open=1&uri=/group/topic/${cId}?&&page=&source=mdouban&download=1&event_source=mdouban&fallback=&copy=1&model=B&channel=m_ad_nav_group_topic`
+    Taro.navigateTo({url: jumpUrl})
+  }
+
   onHelp = () => {
     Taro.showModal({
       showCancel: false,

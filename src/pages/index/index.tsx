@@ -34,6 +34,7 @@ class Index extends Component {
     importantList: gs('importantList'), // 置顶名单
     blackList: gs('blackList', ['关键词1', '关键词2', '关键词3']), // 黑名单
     visitedContentIdArr: gs('visitedContentIdArr'), // mock a:visited，记录访问过的a标签
+    auth: gs('auth', '')
   }
 
   componentDidMount () {
@@ -42,7 +43,7 @@ class Index extends Component {
 
   // fetchType: prepend是获取最新数据并追加到列表前面，nextPage是翻下一页并追加到列表后面
   fetchList = (fetchType?:''|'prepend'|'nextPage') => {
-    const {cache, activeTab} = this.state
+    const {cache, activeTab, auth} = this.state
     const isPrepend = fetchType == 'prepend' // 是否已经有缓存了，追加请求数据，比如点击刷新按钮时
     const list = cache[activeTab] || []
 
@@ -71,7 +72,7 @@ class Index extends Component {
     }
 
     showLoading()
-    utils.crawlToDomOnBatch(urlArr, (root, i, stop) => {
+    utils.crawlToDomOnBatch(urlArr, auth, (root, i, stop) => {
 
       // 记录小组名称
       if (!groupMsg[activeTab]) {
@@ -191,6 +192,16 @@ class Index extends Component {
     if (!onChangeMap[field]) {
       onChangeMap[field] = utils.debounce(this.onFieldChange.bind(this, field), 2000)
     }
+    if (field == 'auth'){
+      return {
+        name: field,
+        value: this.state[field],
+        placeholder: '',
+        maxLength: 10000, // 覆盖默认140
+        onChange: onChangeMap[field],
+        // onBlur: this.onFieldChange.bind(this, field)
+      } 
+    }
 
     return {
       name: field,
@@ -204,6 +215,10 @@ class Index extends Component {
 
   onFieldChange = (field, val) => {
     const {activeTab} = this.state
+    if (field == 'auth') {
+      Taro.setStorage({key: field, data: val})
+      return
+    }
 
     // 分割成数组 、 替换掉前后空格 、 过滤空字符串
     val = val.split(/,|，/).map(s => s.trim()).filter(s => s)
@@ -324,6 +339,7 @@ class Index extends Component {
           <AtInput {...this.getInputProps('importantList')} title='置顶关键词' />
           <AtInput {...this.getInputProps('blackList')} title='屏蔽关键词' />
           <AtSwitch title='显示中介信息' onChange={isShowAgent => this.setState({isShowAgent})} />
+          <AtInput {...this.getInputProps('auth')} title='认证信息'/>
           {searchTipHtml}
         </View>
 

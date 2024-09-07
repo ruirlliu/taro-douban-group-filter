@@ -14,15 +14,15 @@ if (!_userId) {
 
 // 打点
 export function log (_event = '', data = {}) {
-  return Taro.request({
-    url: 'https://api.guangjun.club/logger/log',
-    data: {
-      _event,
-      _userId,
-      // _timestamp: new Date().getTime(),
-      _platform: platform.name,
-      _appName: 'douban-group-filter',
-      ...data,
-    }
-  })
+  // return Taro.request({
+  //   url: 'https://api.guangjun.club/logger/log',
+  //   data: {
+  //     _event,
+  //     _userId,
+  //     // _timestamp: new Date().getTime(),
+  //     _platform: platform.name,
+  //     _appName: 'douban-group-filter',
+  //     ...data,
+  //   }
+  // })
 }
